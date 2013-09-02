@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/epics_custom.css" media="all" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
     <!--[if lt IE 9]>
@@ -33,31 +34,95 @@
         <section id="overview">
           <h3>Overview</h3>
 
-          <p>For studying thermal properties of FPGAs (e.g., for building thermal models or for investigating fault-tolerance methods for mitigating temperature induced soft-errors) it is important to have hardware cores that can generate large amounts of heat. In our publication "M. Happe, H. Hangmann, A. Agne, and C. Plessl. <i>Eight ways to put your FPGA on fire – a systematic study of heat generators.</i> In Proc. Int. Conf. on ReConFigurable Computing and FPGAs (ReConFig), pages 1–8. IEEE Computer Society, Dec. 2012." we have presented a study that evaluated several methods for intentionally generating heat on FPGAs. This projects make the best performing heat generator from this study (oscillators implemented in LUTs) available as open-source hardware, that is, a pcore that can be embedded in Xilinx EDK designs. The amount of heat can be regulated in 32 levels.
+          <p>For studying thermal properties of FPGAs (e.g., for building thermal models or for investigating fault-tolerance methods for mitigating temperature induced soft-errors) it is important to have hardware cores that can generate large amounts of heat. In our publication "M. Happe, H. Hangmann, A. Agne, and C. Plessl. <i><a href="http://www.epics-project.eu/publications/2012_happe_reconfig.pdf">Eight ways to put your FPGA on fire – a systematic study of heat generators.</a></i> In Proc. Int. Conf. on ReConFigurable Computing and FPGAs (ReConFig), pages 1–8. IEEE Computer Society, Dec. 2012." we have presented a study that evaluated several methods for intentionally generating heat on FPGAs. This projects make the best performing heat generator from this study (oscillators implemented in LUTs) available as open-source hardware, that is, a PCore that can be embedded in Xilinx EDK designs. The amount of heat can be regulated in 32 levels.
           </p>
+        </section>
+
+        <section id="use">
+          <h3>Using the Heater Core</h3>
+
+          <h4>Step 1 – Adding the Heat Core to your XPS project</h4>
+
+          <ol>
+            <li><a href="https://github.com/epics/fpga-heater">Download</a> the Heat Core and the TimeBase.</li>
+
+            <li>Copy the Heat Core and the Time PCores to your project by copying the "heat_core" and the "simple_timebase" directories to the "pcores" directory of your project.</li>
+
+            <li><p>Open your XPS project and rescan the user repositories.<br/>
+              <figure class="center">
+                <img src="https://dl.dropboxusercontent.com/u/15289540/screenshot.png" />
+              </figure>
+              </p>
+            </li>
+
+            <li><p>Add the PCores by right-clicking and adding them.<br/>
+              <figure class="center">
+                <img src="https://dl.dropboxusercontent.com/u/15289540/foto%203.png" />
+              </figure>
+              </p>
+            </li>
+
+            <li>Choose the number of LUT-Oscillators, which create the heat, by changing the value of <code>C_NUM_LUTS</code>.</li>
+
+            <li><p>Prevent trimming of the heat core by opening the <em>Implementation Options File</em> and adding <code>-u</code> to the mapper options.<br/>
+              <figure class="center">
+                <img src="https://dl.dropboxusercontent.com/u/15289540/foto5.png"/></p>
+              </figure>
+            </li>
+
+            <li>Ignore timing errors, by unchecking <em>"Treat timing closure failure as an error"</em> in your project settings. This step is required because the Heat Core will produce timing errors to work properly.
+            </li>
+          </ol>
+
+
+          <h4>Step 2 - Using the Heat Core in your C code</h4>
+
+          <ol>
+            <li>Use the example project <em>heat_control</em>, which can be found in the GitHub repository. Alternatively, you need to add the following C header files to your project: <em>heat_core.h</em>, <em>time_base.h</em>, and  <em>system_monitor.h</em>.
+
+            <li>Now you can use the HeatCore with the following functions:
+              <ul>
+                <li><code>int get_active_heater( unsigned int* heat_core )</code>  -  returns the number of active heat blocks (1 - 32)</li>
+                <li><code>void set_active_heater( unsigned int* heat_core, int active )</code>  -  sets the number of active heat blocks (1 - 32)</li>
+                <li><code>void enable( unsigned int* heat_core )</code> -  enables the HeatCore</li>
+                <li><code>void disable( unsigned int* heat_core )</code> -  disables the HeatCore</li>
+                <li><code>void increase( unsigned int* heat_core)</code> -  increases the Heat Core's intensity level</li>
+                <li><code>void decrease( unsigned int* heat_core)</code> -  decreases the Heat Core's intensity level</li>
+                <li><code>int enabled( unsigned int* heat_core )</code> -  returns '1' if heater is enabled </li>
+                <li><code>unsigned int sysmon_get_mcelsius()</code> -  returns the temperature of your FPGA in millicelsius</li>
+                <li><code>unsigned int sysmon_get_vcc()</code> -  returns the voltage of your FPGA</li>
+                <li><code>void wait_for_ms(int duration)</code> -  waits for duration ms</p></li>
+              </ul>
+            </li>
+
+          <h4>Step 3 - Set placement constraints</h4>
+
+          Open the UCF file of your project and constrain the placement of your Heat Cores, e.g., with the following constraints:<br />
+          <code>INST "heat_core_1" AREA_GROUP = "heat_cores";</code><br />
+          <code>INST "heat_core_2" AREA_GROUP = "heat_cores";</code><br />
+          <code>AREA_GROUP "heat_cores" RANGE = SLICEX0Y50:SLICE_X61Y111;</code>
+
         </section>
 
         <section id="license">
           <h3>License</h3>
+
           <p>Copyright (c) 2013 Hendrik Hangmann, University of Paderborn</p>
+
           <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
             <ul>
               <li>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</li>
+
               <li>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</li>
             </ul>
-        </section>
-
-
-
-        <section id="main_content">
-          <p>You can find the manual on the Wiki pages.</p>
+          </p>
         </section>
 
         <footer>
-          Fpga-heater is maintained by <a href="https://github.com/EPiCS">EPiCS</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+          The fpga-heater repository is maintained by <a href="https://github.com/EPiCS">EPiCS</a><br>
+          This page uses the Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
         </footer>
-
         
       </div>
     </div>
