@@ -10,7 +10,7 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Fpga-heater by EPiCS</title>
+    <title>Efficient Heater Cores for Xilinx Virtex FPGAs</title>
   </head>
 
   <body>
@@ -18,8 +18,8 @@
       <div class="inner">
 
         <header>
-          <h1>Fpga-heater</h1>
-          <h2>Heats up your FPGA</h2>
+          <h1>Efficient Heater Cores for Xilinx Virtex FPGAs</h1>
+          <h2>Set your FPGA on fire!</h2>
         </header>
 
         <section id="downloads" class="clearfix">
@@ -29,6 +29,13 @@
         </section>
 
         <hr>
+        
+        <section id="overview">
+          <h3>Overview</h3>
+
+          <p>For studying thermal properties of FPGAs (e.g., for building thermal models or for investigating fault-tolerance methods for mitigating temperature induced soft-errors) it is important to have hardware cores that can generate large amounts of heat. In our publication "M. Happe, H. Hangmann, A. Agne, and C. Plessl. <i>Eight ways to put your FPGA on fire – a systematic study of heat generators.</i> In Proc. Int. Conf. on ReConFigurable Computing and FPGAs (ReConFig), pages 1–8. IEEE Computer Society, Dec. 2012." we have presented a study that evaluated several methods for intentionally generating heat on FPGAs. This projects make the best performing heat generator from this study (oscillators implemented in LUTs) available as open-source hardware, that is, a pcore that can be embedded in Xilinx EDK designs. The amount of heat can be regulated in 32 levels.
+          </p>
+        </section>
 
         <section id="license">
           <h3>License</h3>
